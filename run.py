@@ -1,16 +1,20 @@
+import os
 from dotenv import find_dotenv, load_dotenv
 from cacher import cache_csv, cache_excel, cache_sql
 
 
+CACHE_DIR  = './data/cache'
+
 def main():
-    print(cache_csv('./data/raw/some_data.csv', './data/raw/cache'))
+    
+    print(cache_csv('./data/raw/csv_data.csv', CACHE_DIR))
 
-    print(cache_excel('./data/raw/excel_data.xlsx', './data/raw/cache'))
+    print(cache_excel('./data/raw/excel_data.xlsx', CACHE_DIR))
 
-    print(cache_sql('./data/raw/queries/some_query.sql', './data/raw/cache',
-        con='connection_string'))
+    print(cache_sql('./data/queries/some_query.sql', CACHE_DIR, 
+        con=os.getenv('DATABASE_URI')))
 
 
 if __name__ == '__main__':
-    from dotenv import find_dotenv, load_dotenv
+    load_dotenv(find_dotenv())
     main()

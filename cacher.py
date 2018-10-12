@@ -5,7 +5,7 @@ import pandas as pd
 class CacheFile(object):
     '''Decorator to add caching to functions that read files into dataframes
 
-    Examples of these functions are:
+    Examples of these functions
         pandas.read_excel (.xlsx, .xls)
         pandas.read_csv (.csv)
         pandas.read_sql (.sql)
@@ -29,9 +29,8 @@ class CacheFile(object):
             - filepath is not the correct extension
             - use_cache is not bool
 
-    Return <Pandas.DataFrame>:
-        Data in filepath as DataFrames. If a command/query, then read, execute and
-        return command/query results.
+    Return: 
+        Pandas.DataFrame
     '''
 
     def __init__(self, reader=None, suffixes=None, helper=None):
@@ -72,7 +71,7 @@ class CacheFile(object):
                 data = self._reader(target, **kwargs)
 
                 # cache to parquet
-                df.to_parquet(cache_file, compression='snappy')
+                data.to_parquet(cache_file, compression='snappy')
 
             else: # cache file is ready
                 # read from cache
@@ -107,6 +106,7 @@ class CacheFile(object):
         # check use_cache is bool
         if not isinstance(self._use_cache, bool):
             raise ValueError('Given use_cache is not type bool')
+
 
 
 @CacheFile(pd.read_csv, suffixes = ['.csv'])
