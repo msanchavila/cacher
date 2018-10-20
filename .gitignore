@@ -1,5 +1,8 @@
-# igore these project directories
+# ignore these project directories
 /data
+
+# ignore these scripts
+run.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
