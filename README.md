@@ -25,7 +25,7 @@ _Please refer to Pandas documentation for these keyword arguments._
 * Excel (*.xlsx, *.xls) -> **cache_excel** -> [Pandas.read_excel](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html)
 * CSV (*.csv) -> **cache_csv** -> [Pandas.read_csv](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html)
 * JSON (*.json) -> **cache_json** -> [Pandas.read_json](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_json.html)
-* SQL (*.sql) -> **cache_sql** -> [Pandas.read_sql](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html)
+* SQL (*.sql) -> **cache_sql** -> [Pandas.read_sql_query](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html)
 
 
 ## Usage
