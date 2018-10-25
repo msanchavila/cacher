@@ -15,7 +15,7 @@ is great if you have a large file or query you want to constantly re-read for an
 reading the large file/query every time, you can read it once, write a parquet and re-use the parquet; saving valuable time and
 storage space in the process. 
 
-### Cachers
+## Cachers
 
 Currently there are 4 file types supported, each with its corresponding cacher. 
 Under the hood, these cachers are powered by an equivalent Pandas read function. 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     main()
 ```
 
-### Caching
+## Caching
 
 So, how do these cachers _**cache**_? 
 
