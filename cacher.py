@@ -1,5 +1,43 @@
+#!/usr/bin/env python
+'''
+    Parquet caching functionality
+    Written by Martin Sanchez (https://github.com/msanchavila)
+    Inspired by Alex Chen (alchenist)
+'''
 from pathlib import Path
 import pandas as pd
+
+
+def format_cache_file(cache_dir, filename):
+    '''Function to format cache file name and location
+
+    Args:
+        cache_dir <str>: Directory to store cache
+        filename <str>: File name
+
+    Return <str>:
+        Location of file 
+    '''
+    return cache_dir / '{}.parquet'.format(filename)
+
+def caching_required(filepath, cache_file, use_cache):
+    '''Function to check if caching will be required
+
+        Caching is requied when any of these conditions are True;
+        - use_cache option is False
+        - cache_file does not exist in cache directory
+        - target file was modified after cache_file was generated
+
+    Args:
+        filepath <str>: location of souce data file
+        cache_file <str>: location of target cache file
+        use_cache <bool>: 
+
+    Return <bool>:
+        Indicate if caching is required
+    '''
+    return not use_cache or not cache_file.exists() or \
+            filepath.stat().st_mtime > cache_file.stat().st_mtime
 
 
 class CacheFile(object):
@@ -24,7 +62,7 @@ class CacheFile(object):
             - filepath is not the correct extension
             - use_cache is not bool
 
-    Return: 
+    Return:
         Pandas.DataFrame
     '''
 
@@ -34,29 +72,28 @@ class CacheFile(object):
         self._suffixes = suffixes
 
     def __call__(self, func):
-        
+
         def wrapper(filepath, cache_dir, use_cache=True, **kwargs):
             '''Method to wrap cache function
-            
-            Does not call wrapped func, instead uses _reader; given as decorator 
+
+            Does not call wrapped func, instead uses _reader; given as decorator
             parameter
             '''
-            # store inputs
-            self._filepath = Path(filepath)
-            self._cache_dir = Path(cache_dir)
-            self._use_cache = use_cache
+            # convert to Path objects
+            filepath = Path(filepath)
+            cache_dir = Path(cache_dir)
 
-            # checks before caching            
-            self._input_arg_checks()
+            # checks before caching
+            self._check_input_args(filepath, cache_dir, use_cache)
 
             # define where data cache will live
-            cache_file = self._get_cache_file()
+            cache_file = format_cache_file(cache_dir, filepath.stem)
 
             # caching is on OR cache does not exist OR cache is out dated
-            if self._caching_required(cache_file):
+            if caching_required(filepath, cache_file, use_cache):
                 # access target
-                target = self._get_reader_target()
-                
+                target = self._get_reader_target(filepath)
+
                 # read data from file
                 data = self._reader(target, **kwargs)
 
@@ -71,64 +108,42 @@ class CacheFile(object):
 
         return wrapper
 
-    def _get_reader_target(self):
+    def _get_reader_target(self, filepath):
         '''Method to use _helper if required
 
         The purpose of this is to open _filepath which contains a query or execution
         commands used by _reader function.
 
-        If not _helper is defined, _filepath is target
+        If _helper is not defined, _filepath is target
         '''
-        return self._helper(self._filepath) if self._helper else self._filepath
+        return self._helper(filepath) if self._helper else filepath
 
-    def _get_cache_file(self):
-        '''Method to define cache file'''
-        return self._cache_dir / '{}.parquet'.format(self._filepath.stem)
-
-    def _caching_required(self, cache_file):
-        '''Method to check if caching is required
-
-        Caching is requied when any of these conditions are True;
-            - use_cache option is False
-            - cache_file does not exists in cache directory
-            - target file was modified after cache_file was generated
-        '''
-        return not self._use_cache or not cache_file.exists() or \
-                self._filepath.stat().st_mtime > cache_file.stat().st_mtime
-
-    def _input_arg_checks(self):
-        '''Method to check input arguments before beginning cache process'''        
-        if not isinstance(self._use_cache, bool):
-            raise ValueError('Given use_cache is not type bool')
-
-        self._io_checks()
-
-        self._filetype_check()
-
-    def _filetype_check(self):
-        '''Method to check if _filepath is the correct filetype'''
-        # check to make sure correct file ext is being
-        if self._suffixes and not self._filepath.suffix in self._suffixes:
-            raise ValueError('Given filepath is not the correct file extension %s' % 
-                self._filepath)
-
-    def _io_checks(self):
+    def _check_input_args(self, filepath, cache_dir, use_cache):
         '''Method to execute necessary checks before caching
 
         Checks to ensure given target file exists, given target file has correct
         file type, and given cache directory exists.
         '''
+        if not isinstance(use_cache, bool):
+            raise ValueError('Given use_cache is not type bool')
+
         # check filepath does exist
-        if not self._filepath.is_file():
+        if not filepath.is_file():
             raise IOError('Given filepath cannot be found or does not exist %s' %
-                self._filepath)
+                          filepath)
 
         # check cachedir directory exists
-        if not self._cache_dir.is_dir():
+        if not cache_dir.is_dir():
             raise IOError('Given cache_dir cannot be found or does not exist %s' %
-                self._cache_dir)
+                          cache_dir)
 
-@CacheFile(pd.read_json, suffixes = ['.json'])
+        # check to make sure correct file ext is being
+        if self._suffixes and not filepath.suffix in self._suffixes:
+            raise ValueError('Given filepath is not the correct file extension %s' %
+                             filepath)
+
+
+@CacheFile(pd.read_json, suffixes=['.json'])
 def cache_json(filepath, cache_dir, use_cache, **kwargs):
     '''Function to cache json file or valid JSON string
 
@@ -149,9 +164,9 @@ def cache_json(filepath, cache_dir, use_cache, **kwargs):
     '''
     pass
 
-@CacheFile(pd.read_csv, suffixes = ['.csv'])
+@CacheFile(pd.read_csv, suffixes=['.csv'])
 def cache_csv(filepath, cache_dir, use_cache, **kwargs):
-    '''Function to cache csv file
+    '''Function to cache CSV file
 
     Will ensure an updated version of filepath is cached as a parquet file in
     cache_dir. The parquet file will have the same name as filepath.
@@ -170,9 +185,9 @@ def cache_csv(filepath, cache_dir, use_cache, **kwargs):
     '''
     pass
 
-@CacheFile(pd.read_excel, suffixes = ['.xlsx', '.xls'])
+@CacheFile(pd.read_excel, suffixes=['.xlsx', '.xls'])
 def cache_excel(filepath, cache_dir, use_cache, **kwargs):
-    '''Function to cache excel file
+    '''Function to cache Excel
 
     Will ensure an updated version of filepath is cached as a parquet file in
     cache_dir. The parquet file will have the same name as filepath.
