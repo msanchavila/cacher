@@ -73,6 +73,7 @@ There are certain conditions where the cacher will need to re-create your cache:
 
 If either of those conditions are `True`, the cacher will attempt to re-create your cache. 
 
-# Authors
-    * [Alex Chen](https://github.com/alchenist)
-    * [Martin Sanchez](https://github.com/msanchavila)
+## Authors
+
+* [Alex Chen](https://github.com/alchenist)
+* [Martin Sanchez](https://github.com/msanchavila)
