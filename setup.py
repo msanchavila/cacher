@@ -10,5 +10,5 @@ setup(
    version='1.0',
    description=DESCRIPTION,
    packages=['cacher'], 
-   install_requires=['pandas', 'pyarrow', 'xlrd', 'fastparquet'], 
+   install_requires=['pandas', 'pyarrow', 'xlrd'], 
 )
