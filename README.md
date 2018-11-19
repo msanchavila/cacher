@@ -1,6 +1,6 @@
-# Caching
+# Cacher
 
-Caching is a module with functionality to cache large datasets or long-running queries for future re-use and faster reads. 
+Cacher is a tool with functionality to cache large datasets or long-running queries for future re-use and faster reads. 
 
 Simply stated, its a thin wrapper around some of Pandas read calls which stores the resultant DataFrame as a Parquet. 
 
@@ -28,6 +28,14 @@ _Please refer to Pandas documentation for these keyword arguments._
 * SQL (*.sql) -> **cache_sql** -> [Pandas.read_sql_query](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html)
 
 
+## Installation
+
+To install into your python environment, use the folling instructions:
+
+```
+pip install git+https://github.com/msanchavila/cacher
+```
+
 ## Usage
 
 The snippet below demostrates the basic usage of each cacher.
@@ -36,6 +44,7 @@ The snippet below demostrates the basic usage of each cacher.
 from cacher import cache_csv, cache_excel, cache_json, cache_sql
 
 CACHE_DIR  = './cache'
+
 
 def main():
     df_csv = cache_csv('some_data.csv', CACHE_DIR)
